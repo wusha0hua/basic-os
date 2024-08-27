@@ -1,0 +1,5 @@
+print('{:x}'.format(0x7c00+0x200))
+print('{:x}'.format(0x7f00))
+print('{:x}'.format(0x8000))
+print(0x200)
+print('{:x}'.format(512))

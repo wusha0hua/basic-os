@@ -1,0 +1,97 @@
+jmp kernel
+
+str_kernel db "hello kernel",0
+
+kernel:
+	mov ax,cs
+	mov ds,ax
+	mov si,str_kernel
+	call PrintStr
+	;call PrintLF
+	call GetInputChar	
+	jmp End
+
+GetInputChar:
+	call PrintLF
+	mov ah,0
+	int 0x16
+	call GetAscii
+	call PrintAscii
+	jmp GetInputChar
+
+GetAscii:
+	xor dx,dx
+	xor cx,cx
+
+	mov ch,al
+	shr ch,4
+	mov dh,ch
+
+	mov cl,al
+	shl cl,4
+	shr cl,4
+	mov dl,cl
+
+; number + 0x30 ; letter + 0x41
+; number<=9 
+; a<=letter
+
+DL:
+	cmp dl,9
+	jle DLNumer
+	cmp dl,0xa
+	jge DLLetter
+
+DLNumer:
+	add dl,0x30
+	jmp DH
+DLLetter:
+	add dl,0x41
+	jmp DH
+
+DH:
+	cmp dh,9
+	jle DHNumber
+	cmp dh,0xa
+
+DHNumber:
+	add dh,0x30
+	jmp Return
+DHLetter:
+	add dh,0x41	
+	jmp Return
+
+PrintAscii:
+	mov ah,0xe
+	mov al,dh
+	int 0x10
+	mov al,dl
+	int 0x10
+
+	jmp Return
+
+
+
+PrintStr:
+	mov ah,0xe
+	mov al,[si]
+	cmp al,0
+	je Return
+	int 0x10
+	inc si
+	jmp PrintStr
+
+PrintLF:
+	mov ah,0xe
+	mov al,0xd
+	int 0x10
+	mov al,0xa
+	int 0x10
+	jmp Return
+
+Return:
+	ret
+
+End:
+	jmp $
+
